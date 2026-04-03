@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
             $table->string('role')->default('employee');
             $table->decimal('leave_balance', 8, 2)->default(10.00);
             $table->foreignId('manager_id')->nullable()->constrained('users')->onDelete('set null');

@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\HandleUserRequests;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,9 +16,15 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::redirect('/', '/login');
+
+Route::get('/emergency-logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -24,4 +32,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// 3. Manager Dashboard
+Route::get('manager/dashboard', function () {
+    return Inertia::render('Manager/Dashboard');
+})->middleware(['auth', 'verified', HandleUserRequests::class])->name('manager.dashboard');
+
+// 4. Employee Dashboard
+Route::get('employee/dashboard', function () {
+    return Inertia::render('Employee/Dashboard');
+})->middleware(['auth', 'verified', HandleUserRequests::class])->name('employee.dashboard');
 require __DIR__.'/auth.php';

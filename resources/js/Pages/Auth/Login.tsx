@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {FormEventHandler, useState} from 'react';
+import { router } from "@inertiajs/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +27,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 
-import GuestLayout from '@/Layouts/GuestLayout';
+import GuestLayout from '@/layouts/GuestLayout';
 import { Head, Link } from '@inertiajs/react';
 
 
@@ -55,20 +56,22 @@ export default function Login() {
 
     function onSubmit(data: z.infer<typeof schema>) {
         console.log(data);
+
+        router.post(route('login'), data)
     }
 
     return (
        <>
            <div className="flex min-h-screen items-center justify-center p-4 bg-gray-100">
-               <Card className="w-full flex sm:max-w-md mt-10 bg-white border-0 shadow-none outline-none">
-                   <CardHeader>
+               <Card className="w-full flex sm:max-w-md py-6 px-2 bg-white border-0 shadow-none outline-none shadow-xl">
+                   <CardHeader className="mb-3">
                        <CardTitle className="text-black text-lg">Login</CardTitle>
-                       <CardDescription>
+                       <CardDescription className="text-gray-500 text-sm">
                            Enter your email below to login to your account
                        </CardDescription>
                    </CardHeader>
                    <CardContent>
-                       <form id="login" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                       <form id="login" onSubmit={form.handleSubmit(onSubmit)} className="">
                            <FieldGroup className="mb-8">
                               <div className="flex flex-col gap-1">
                                   <Controller name="email" control={form.control} render={({ field, fieldState }) => (
@@ -82,7 +85,7 @@ export default function Login() {
                                               id="email"
                                               aria-invalid={fieldState.invalid}
                                               autoComplete="off"
-                                                
+
                                           />
 
                                           {fieldState.invalid && (
@@ -118,17 +121,19 @@ export default function Login() {
 
                            </FieldGroup>
 
-                          <div className="flex flex-col items-center justify-between">
-                              <Button type="submit" className="w-full bg-black text-white" variant="outline">
-                                  Sign In
+                          <div className="flex flex-col items-center justify-between gap-3">
+                              <Button type="submit" className="w-full rounded-md bg-black text-white  text-center" variant="outline">
+                                  Log In
                               </Button>
 
                               <Link
                                   href={route('register')}
-                                  className="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                                  className="w-full rounded-md bg-black text-white text-center"
                               >
 
-                                      Register
+                                      <Button>
+                                          Register
+                                      </Button>
 
                               </Link>
                           </div>

@@ -1,121 +1,202 @@
-import InputError from '@/components/InputError';
-import InputLabel from '@/components/InputLabel';
-import PrimaryButton from '@/components/PrimaryButton';
-import TextInput from '@/components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+"use client";
 
-export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
+import * as React from 'react';
+import * as z from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import {FormEventHandler, useState} from 'react';
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import {
+    Field,
+    FieldDescription,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
+import GuestLayout from '@/layouts/GuestLayout';
+import { Head, Link } from '@inertiajs/react';
+
+
+export default function Login() {
+
+    const [open, setOpen] = useState(false);
+
+    const schema = z.object({
+        name: z.string().min(1, { message: "Name is required" }),
+        email: z.string().email("Please enter a valid email address"),
+        password: z.string().min(1, { message: "Password is required" }),
+        confirm_password: z.string().min(1, { message: "Confirm Password is required" }),
+        remember: z.boolean().optional(),
+    }).refine((data) => data.password === data.confirm_password, {
+        message: "Passwords do not match",
+        path: ["confirm_password"],
+    })
+
+
+    type LoginFormData = z.infer<typeof schema>;
+
+    // Set up the form with zod
+    const form = useForm<z.infer<typeof schema>>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+        }
+    })
+
+
+    function onSubmit(data: z.infer<typeof schema>) {
+        console.log(data);
+    }
 
     return (
-        <GuestLayout>
-            <Head title="Register" />
+        <>
+            <div className="flex min-h-screen items-center justify-center p-4 bg-gray-100">
+                <Card className="w-full flex sm:max-w-md py-6 px-2 bg-white border-0 outline-none shadow-xl">
+                    <CardHeader className="mb-3">
+                        <CardTitle className="text-black text-lg">Register</CardTitle>
+                        <CardDescription className="text-gray-500 text-sm">
+                             Fill up the form below to register
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form id="login" onSubmit={form.handleSubmit(onSubmit)} className="">
+                            <FieldGroup className="mb-8">
+                                <div className="flex flex-col ">
+                                    <Controller name="name" control={form.control} render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="login-form-title" className="m-0">
+                                                Name
+                                            </FieldLabel>
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                                            <Input
+                                                {...field}
+                                                id="email"
+                                                aria-invalid={fieldState.invalid}
+                                                autoComplete="off"
 
-                    <TextInput
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        className="mt-1 block w-full"
-                        autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                    />
+                                            />
 
-                    <InputError message={errors.name} className="mt-2" />
-                </div>
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                    />
+                                </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
+                                <div className="flex flex-col gap-2">
+                                    <Controller name="email" control={form.control} render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="login-form-title">
+                                                Email Address
+                                            </FieldLabel>
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                    />
+                                            <Input
+                                                {...field}
+                                                id="password"
+                                                aria-invalid={fieldState.invalid}
+                                                autoComplete="off"
 
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
+                                            />
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                    />
+                                </div>
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
+                                <div className="flex flex-col gap-2">
+                                    <Controller name="password" control={form.control} render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="login-form-title">
+                                                Password
+                                            </FieldLabel>
 
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
+                                            <Input
+                                                {...field}
+                                                id="password"
+                                                aria-invalid={fieldState.invalid}
+                                                autoComplete="off"
 
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
+                                            />
 
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        required
-                    />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                    />
+                                </div>
 
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
-                </div>
+                                <div className="flex flex-col gap-2">
+                                    <Controller name="password" control={form.control} render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="login-form-title">
+                                                Confirm Password
+                                            </FieldLabel>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Already registered?
-                    </Link>
+                                            <Input
+                                                {...field}
+                                                id="password"
+                                                aria-invalid={fieldState.invalid}
+                                                autoComplete="off"
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
-    );
+                                            />
+
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                    />
+                                </div>
+
+                            </FieldGroup>
+
+                            <div className="flex items-center gap-3 justify-end">
+                                <Link
+                                    href={route('login')}
+                                    className="rounded-md text-black text-center"
+                                >
+
+                                    Already registered?
+
+                                </Link>
+
+                                <Button type="submit" className=" rounded-md bg-black text-white text-center" variant="outline">
+                                    Register
+                                </Button>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
+            </div>
+        </>
+
+    )
+
+
+
+
+
+
+
+
 }
