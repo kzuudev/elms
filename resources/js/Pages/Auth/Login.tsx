@@ -1,110 +1,150 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+"use client";
+
+import * as React from 'react';
+import * as z from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import {FormEventHandler, useState} from 'react';
+
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import {
+    Field,
+    FieldDescription,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Head, Link } from '@inertiajs/react';
 
-export default function Login({
-    status,
-    canResetPassword,
-}: {
-    status?: string;
-    canResetPassword: boolean;
-}) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false as boolean,
-    });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+export default function Login() {
 
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
-    };
+    const [open, setOpen] = useState(false);
+
+    const schema = z.object({
+        email: z.string().email("Please enter a valid email address"),
+        password: z.string().min(1, { message: "Password is required" }),
+        remember: z.boolean().optional(),
+    })
+
+
+    type LoginFormData = z.infer<typeof schema>;
+
+    // Set up the form with zod
+    const form = useForm<z.infer<typeof schema>>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            email: "",
+            password: "",
+        }
+    })
+
+
+    function onSubmit(data: z.infer<typeof schema>) {
+        console.log(data);
+    }
 
     return (
-        <GuestLayout>
-            <Head title="Log in" />
+       <>
+           <div className="flex min-h-screen items-center justify-center p-4 bg-gray-100">
+               <Card className="w-full flex sm:max-w-md mt-10 bg-white border-0 shadow-none outline-none">
+                   <CardHeader>
+                       <CardTitle className="text-black text-lg">Login</CardTitle>
+                       <CardDescription>
+                           Enter your email below to login to your account
+                       </CardDescription>
+                   </CardHeader>
+                   <CardContent>
+                       <form id="login" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                           <FieldGroup className="mb-8">
+                              <div className="flex flex-col gap-1">
+                                  <Controller name="email" control={form.control} render={({ field, fieldState }) => (
+                                      <Field data-invalid={fieldState.invalid}>
+                                          <FieldLabel htmlFor="login-form-title" className="m-0">
+                                              Email Address
+                                          </FieldLabel>
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+                                          <Input
+                                              {...field}
+                                              id="email"
+                                              aria-invalid={fieldState.invalid}
+                                              autoComplete="off"
+                                                
+                                          />
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                                          {fieldState.invalid && (
+                                              <FieldError errors={[fieldState.error]} />
+                                          )}
+                                      </Field>
+                                  )}
+                                  />
+                              </div>
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
+                               <div className="flex flex-col gap-2">
+                                   <Controller name="password" control={form.control} render={({ field, fieldState }) => (
+                                       <Field data-invalid={fieldState.invalid}>
+                                           <FieldLabel htmlFor="login-form-title">
+                                               Password
+                                           </FieldLabel>
 
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
+                                           <Input
+                                               {...field}
+                                               id="password"
+                                               aria-invalid={fieldState.invalid}
+                                               autoComplete="off"
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                                           />
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
+                                           {fieldState.invalid && (
+                                               <FieldError errors={[fieldState.error]} />
+                                           )}
+                                       </Field>
+                                   )}
+                                   />
+                               </div>
 
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
+                           </FieldGroup>
 
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData(
-                                    'remember',
-                                    (e.target.checked || false) as false,
-                                )
-                            }
-                        />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
-                    </label>
-                </div>
+                          <div className="flex flex-col items-center justify-between">
+                              <Button type="submit" className="w-full bg-black text-white" variant="outline">
+                                  Sign In
+                              </Button>
 
-                <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
+                              <Link
+                                  href={route('register')}
+                                  className="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                              >
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
-    );
+                                      Register
+
+                              </Link>
+                          </div>
+                       </form>
+                   </CardContent>
+               </Card>
+           </div>
+       </>
+
+    )
+
+
+
+
+
+
+
+
 }
