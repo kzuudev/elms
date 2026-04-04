@@ -2,28 +2,36 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\HandleUserRequests;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
+
+
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+
+    if(!Auth::check()) {
+        return redirect('/login');
+    }
+
+    if($user->role === 'manager') {
+        return redirect()->route('manager.dashboard');
+    }
+
+    return redirect()->route('employee.dashboard');
+
 });
-
-
-Route::redirect('/', '/login');
 
 Route::get('/emergency-logout', function () {
     Auth::logout();
     request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect('/login');
+    request()->session()->regenerateToken();return redirect('/login');
 });
 
 Route::middleware('auth')->group(function () {
@@ -42,3 +50,6 @@ Route::get('employee/dashboard', function () {
     return Inertia::render('Employee/Dashboard');
 })->middleware(['auth', 'verified', HandleUserRequests::class])->name('employee.dashboard');
 require __DIR__.'/auth.php';
+
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
