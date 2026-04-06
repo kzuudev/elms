@@ -27,7 +27,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 
-import GuestLayout from '@/layouts/GuestLayout';
 import { Head, Link } from '@inertiajs/react';
 
 
@@ -99,15 +98,17 @@ export default function Login() {
                                <div className="flex flex-col gap-2">
                                    <Controller name="password" control={form.control} render={({ field, fieldState }) => (
                                        <Field data-invalid={fieldState.invalid}>
-                                           <FieldLabel htmlFor="login-form-title">
+                                           <FieldLabel htmlFor="login-form-title" >
                                                Password
                                            </FieldLabel>
 
                                            <Input
                                                {...field}
                                                id="password"
+                                               type="password"
                                                aria-invalid={fieldState.invalid}
                                                autoComplete="off"
+
 
                                            />
 

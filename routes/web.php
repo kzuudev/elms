@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-
-
-
 Route::get('/', function () {
 
     /** @var \App\Models\User $user */
@@ -40,16 +37,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// 3. Manager Dashboard
-Route::get('manager/dashboard', function () {
-    return Inertia::render('Manager/Dashboard');
-})->middleware(['auth', 'verified', HandleUserRequests::class])->name('manager.dashboard');
 
-// 4. Employee Dashboard
-Route::get('employee/dashboard', function () {
-    return Inertia::render('Employee/Dashboard');
-})->middleware(['auth', 'verified', HandleUserRequests::class])->name('employee.dashboard');
+Route::middleware(['auth', 'verified', HandleUserRequests::class])->group(function () {
+    Route::get('manager/dashboard', function () {
+        return Inertia::render('Manager/Dashboard');
+    })->name('manager.dashboard');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('employee/dashboard', function () {
+        return Inertia::render('Employee/Dashboard');
+    })->name('employee.dashboard');
+
+});
+
+
 require __DIR__.'/auth.php';
-
-Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-

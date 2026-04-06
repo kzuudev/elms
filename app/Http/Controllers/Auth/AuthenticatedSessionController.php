@@ -55,7 +55,7 @@ class AuthenticatedSessionController extends Controller
         // Log the user out
         Auth::guard('web')->logout();
 
-        // Destory the session
+        // Destroy the session
         $request->session()->invalidate();
 
         // Regenerate the CSRF security token

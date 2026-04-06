@@ -17,17 +17,12 @@ class HandleUserRequests
     {
         $user = $request->user();
 
-        // 1. If an EMPLOYEE is trying to access a MANAGER route, kick them to their dashboard
-        if ($user && $user->role !== 'manager' && $request->routeIs('manager.*')) {
+        // check if the user is not manager, then automatically redirect it to the employee dashboard
+        if($user->role !== 'manager') {
             return redirect()->route('employee.dashboard');
         }
 
-        // 2. If a MANAGER is trying to access an EMPLOYEE route, kick them to their dashboard
-        if ($user && $user->role === 'manager' && $request->routeIs('employee.*')) {
-            return redirect()->route('manager.dashboard');
-        }
-
-        // 3. If they are exactly where they are supposed to be, open the door!
+        // Otherwise, redirect it to the manager role.
         return $next($request);
     }
 
