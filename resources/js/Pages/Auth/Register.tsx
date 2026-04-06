@@ -1,46 +1,39 @@
 "use client";
 
 import * as React from 'react';
+import { useState} from 'react';
 import * as z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import {FormEventHandler, useState} from 'react';
+import {Link, router} from '@inertiajs/react';
 
 import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 
-import GuestLayout from '@/layouts/GuestLayout';
-import { Head, Link } from '@inertiajs/react';
 
 
 export default function Login() {
-
-    const [open, setOpen] = useState(false);
 
     const schema = z.object({
         name: z.string().min(1, { message: "Name is required" }),
         email: z.string().email("Please enter a valid email address"),
         password: z.string().min(1, { message: "Password is required" }),
-        confirm_password: z.string().min(1, { message: "Confirm Password is required" }),
+        password_confirmation: z.string().min(1, { message: "Confirm Password is required" }),
         remember: z.boolean().optional(),
-    }).refine((data) => data.password === data.confirm_password, {
+    }).refine((data) => data.password === data.password_confirmation, {
         message: "Passwords do not match",
         path: ["confirm_password"],
     })
@@ -55,12 +48,17 @@ export default function Login() {
             name: "",
             email: "",
             password: "",
+            password_confirmation: "",
         }
     })
 
 
     function onSubmit(data: z.infer<typeof schema>) {
+
+        router.post(route('register'), data);
         console.log(data);
+
+
     }
 
     return (
@@ -132,6 +130,7 @@ export default function Login() {
                                             <Input
                                                 {...field}
                                                 id="password"
+                                                type="password"
                                                 aria-invalid={fieldState.invalid}
                                                 autoComplete="off"
 
@@ -146,7 +145,7 @@ export default function Login() {
                                 </div>
 
                                 <div className="flex flex-col gap-2">
-                                    <Controller name="password" control={form.control} render={({ field, fieldState }) => (
+                                    <Controller name="password_confirmation" control={form.control} render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
                                             <FieldLabel htmlFor="login-form-title">
                                                 Confirm Password
@@ -154,7 +153,8 @@ export default function Login() {
 
                                             <Input
                                                 {...field}
-                                                id="password"
+                                                id="confirm-password"
+                                                type="password"
                                                 aria-invalid={fieldState.invalid}
                                                 autoComplete="off"
 

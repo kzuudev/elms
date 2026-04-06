@@ -36,8 +36,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'role' => 'required|string|in:manager,employee',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => 'required|confirmed|min:8',
         ]);
 
         // Create the user
@@ -54,6 +53,7 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         // Redirect to the dashboard
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('employee.dashboard', absolute: false));
     }
+
 }

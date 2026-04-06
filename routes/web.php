@@ -48,8 +48,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('employee/dashboard', function () {
         return Inertia::render('Employee/Dashboard');
     })->name('employee.dashboard');
-
 });
+
 
 
 require __DIR__.'/auth.php';

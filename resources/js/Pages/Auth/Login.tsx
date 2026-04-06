@@ -5,14 +5,13 @@ import * as z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {FormEventHandler, useState} from 'react';
-import { router } from "@inertiajs/react";
+import {router, usePage} from "@inertiajs/react";
 
 import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
@@ -32,7 +31,11 @@ import { Head, Link } from '@inertiajs/react';
 
 export default function Login() {
 
-    const [open, setOpen] = useState(false);
+
+    const { errors } = usePage().props;
+
+    console.log(errors);
+
 
     const schema = z.object({
         email: z.string().email("Please enter a valid email address"),
@@ -44,7 +47,7 @@ export default function Login() {
     type LoginFormData = z.infer<typeof schema>;
 
     // Set up the form with zod
-    const form = useForm<z.infer<typeof schema>>({
+    const form = useForm<LoginFormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             email: "",
@@ -82,9 +85,9 @@ export default function Login() {
                                           <Input
                                               {...field}
                                               id="email"
+                                              type="email"
                                               aria-invalid={fieldState.invalid}
                                               autoComplete="off"
-
                                           />
 
                                           {fieldState.invalid && (
@@ -108,8 +111,6 @@ export default function Login() {
                                                type="password"
                                                aria-invalid={fieldState.invalid}
                                                autoComplete="off"
-
-
                                            />
 
                                            {fieldState.invalid && (
@@ -118,6 +119,10 @@ export default function Login() {
                                        </Field>
                                    )}
                                    />
+                               </div>
+
+                               <div>
+                                   {errors.email && <p className="text-red-500 text-sm">{errors.email}</p> }
                                </div>
 
                            </FieldGroup>
